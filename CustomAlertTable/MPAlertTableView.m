@@ -11,6 +11,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 #define MAX_ALERT_HEIGHT (260.0)
+#define MAX_ALERT_MESSAGE_HEIGHT (200.0)
 #define BTN_TAG_BASE     (0x1000)
 
 #define BTN_1ST_X        (14.0)
@@ -61,9 +62,8 @@
     [super dealloc];
 }
 
-- (id) initWithCaller:(id<MPAlertTableViewDelegate>)_caller title:(NSString*)_title
-      tableDataSource:(NSArray*)_tableDataArray
-tableSelectedRowIndexs:(NSArray*)_tableSelectedRowIndexs buttonTitles:(NSArray*)buttonTitles
+- (id) initWithCaller:(id<MPAlertTableViewDelegate>)_caller title:(NSString*)_title message:(NSString *)_messageString
+      tableDataSource:(NSArray*)_tableDataArray tableSelectedRowIndexs:(NSArray*)_tableSelectedRowIndexs buttonTitles:(NSArray*)buttonTitles
 {
     CGRect frame;
     UIInterfaceOrientation orient = [[UIApplication sharedApplication] statusBarOrientation];
@@ -83,7 +83,7 @@ tableSelectedRowIndexs:(NSArray*)_tableSelectedRowIndexs buttonTitles:(NSArray*)
     
     int data_cnt = 0x00;
     if(_tableDataArray) data_cnt = [_tableDataArray count];
-
+    
     if(data_cnt > 0)
     {
         self.tableSelectedRowIndexs = [NSMutableDictionary dictionary];
@@ -118,7 +118,6 @@ tableSelectedRowIndexs:(NSArray*)_tableSelectedRowIndexs buttonTitles:(NSArray*)
         }
     }
     
-    //self.delegate = AlertDelegate;
     self.alpha = 0.95;
     self.backgroundColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.6];
     self.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
@@ -139,14 +138,14 @@ tableSelectedRowIndexs:(NSArray*)_tableSelectedRowIndexs buttonTitles:(NSArray*)
     
     //add text
     UILabel *_titleLbl = nil;
-    //UIScrollView *MsgScrollView;
+    //UIScrollView *_msgScrollView;
     
     // title
     if (_title)
     {
         _titleLbl = [[UILabel alloc] initWithFrame:CGRectMake(10.0, alert_height, alert_width-20.0, MY_TITLE_LABEL_H)];
         _titleLbl.adjustsFontSizeToFitWidth = YES;
-
+        
         _titleLbl.numberOfLines = 0;
         _titleLbl.lineBreakMode = UILineBreakModeWordWrap;
         
@@ -164,7 +163,8 @@ tableSelectedRowIndexs:(NSArray*)_tableSelectedRowIndexs buttonTitles:(NSArray*)
         alert_height += 15.0;
     }
     
-    UITableView *_tableView = nil;
+    UIScrollView *_msgScrollView = nil;
+    UITableView  *_tableView = nil;
     if(data_cnt)
     {
         float max_table_height = MAX_ALERT_HEIGHT - alert_height - _cancelBtnImg.size.height;
@@ -175,6 +175,41 @@ tableSelectedRowIndexs:(NSArray*)_tableSelectedRowIndexs buttonTitles:(NSArray*)
         
         alert_height += _tableView.frame.size.height + 5.0; // 15.0;
     }
+    else
+    {
+        if (_messageString)
+        {
+            float max_message_height = MAX_ALERT_MESSAGE_HEIGHT - alert_height - _cancelBtnImg.size.height;
+            
+            UILabel *_messageLbl = [[UILabel alloc] initWithFrame:CGRectMake(10.0, 0.0, alert_width-40.0, 0.0)];
+            _messageLbl.numberOfLines = 0;
+            _messageLbl.font = [UIFont systemFontOfSize:16.0];
+            _messageLbl.textAlignment = UITextAlignmentCenter;
+            _messageLbl.backgroundColor = [UIColor clearColor];
+            _messageLbl.textColor = [UIColor whiteColor];
+            _messageLbl.text = _messageString;
+            
+            [_messageLbl sizeToFit];
+            _messageLbl.frame = CGRectMake(10.0, 0.0, alert_width-40.0, _messageLbl.frame.size.height);
+            
+            while (_messageLbl.frame.size.height>max_message_height && _messageLbl.font.pointSize>12)
+            {
+                _messageLbl.font = [UIFont systemFontOfSize:_messageLbl.font.pointSize-1];
+                [_messageLbl sizeToFit];
+                _messageLbl.frame = CGRectMake(10.0, 0.0, alert_width-40.0, _messageLbl.frame.size.height);
+            }
+            
+            _msgScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(10.0, alert_height, alert_width-20.0, (_messageLbl.frame.size.height>max_message_height)?max_message_height:_messageLbl.frame.size.height)];
+            _msgScrollView.contentSize = _messageLbl.frame.size;
+            [_msgScrollView addSubview:_messageLbl];
+            
+            alert_height += _msgScrollView.frame.size.height + 10.0; // 15.0;
+        }
+        else
+        {
+            alert_height += 15.0;
+        }
+    }
     
     //add buttons
     NSMutableArray *btn_array  = [NSMutableArray array];
@@ -183,7 +218,7 @@ tableSelectedRowIndexs:(NSArray*)_tableSelectedRowIndexs buttonTitles:(NSArray*)
         int btn_count = [buttonTitles count];
         float x_displ = (int)((alert_width-_cancelBtnImg.size.width*btn_count)/(btn_count+0x01));
         CGFloat width = _cancelBtnImg.size.width;
-              
+        
         if(x_displ < BTN_1ST_X)
         {
             x_displ = BTN_1ST_X;
@@ -195,7 +230,7 @@ tableSelectedRowIndexs:(NSArray*)_tableSelectedRowIndexs buttonTitles:(NSArray*)
             x_displ = BTN_1ST_X;
             width = alert_width - (BTN_1ST_X*0x02);
         }
-
+        
         UIButton  *_cancelBtn = nil;
         int       i          = 0x00;
         for(NSString *btn_title in buttonTitles)
@@ -220,7 +255,7 @@ tableSelectedRowIndexs:(NSArray*)_tableSelectedRowIndexs buttonTitles:(NSArray*)
     //add background
     _alertViewWithTable = [[UIView alloc] initWithFrame:CGRectMake((int)((self.frame.size.width-alert_width)/2.0), (int)((self.frame.size.height-alert_height)/2.0 + 0x05), alert_width, alert_height)];
     _alertViewWithTable.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin|
-                                           UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleBottomMargin;
+    UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleBottomMargin;
     _alertImgView.frame = _alertViewWithTable.bounds;
     [_alertViewWithTable addSubview:_alertImgView];
     
@@ -229,6 +264,9 @@ tableSelectedRowIndexs:(NSArray*)_tableSelectedRowIndexs buttonTitles:(NSArray*)
     if (_titleLbl)
         [_alertViewWithTable addSubview:_titleLbl];
     
+    if(_msgScrollView)
+        [_alertViewWithTable addSubview:_msgScrollView];
+    
     if(_tableView)
         [_alertViewWithTable addSubview:_tableView];
     
@@ -236,6 +274,19 @@ tableSelectedRowIndexs:(NSArray*)_tableSelectedRowIndexs buttonTitles:(NSArray*)
         [_alertViewWithTable addSubview:btn];
     
     return self;
+}
+
+- (id) initWithCaller:(id<MPAlertTableViewDelegate>)_caller title:(NSString*)_title
+              message:(NSString *)_messageString buttonTitles:(NSArray*)_buttonTitles
+{
+    return [self initWithCaller:_caller title:_title message:_messageString tableDataSource:nil tableSelectedRowIndexs:nil buttonTitles:_buttonTitles];
+}
+
+- (id) initWithCaller:(id<MPAlertTableViewDelegate>)_caller title:(NSString*)_title
+      tableDataSource:(NSArray*)_tableDataArray
+tableSelectedRowIndexs:(NSArray*)_tableSelectedRowIndexs buttonTitles:(NSArray*)_buttonTitles
+{
+    return [self initWithCaller:_caller title:_title message:nil tableDataSource:_tableDataArray tableSelectedRowIndexs:_tableSelectedRowIndexs buttonTitles:_buttonTitles];
 }
 
 - (void)showInView:(UIView*)view

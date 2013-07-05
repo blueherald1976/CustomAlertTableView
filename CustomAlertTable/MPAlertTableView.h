@@ -29,6 +29,9 @@ typedef enum _ATV_SELECTION_TYPE
       tableDataSource:(NSArray*)_tableDataArray
 tableSelectedRowIndexs:(NSArray*)_tableSelectedRowIndexs buttonTitles:(NSArray*)buttonTitles;
 
+- (id) initWithCaller:(id<MPAlertTableViewDelegate>)_caller title:(NSString*)_title
+              message:(NSString *)_messageString buttonTitles:(NSArray*)buttonTitles;
+
 - (void) showInView:(UIView*)view;
 @property(nonatomic, assign) ATV_SELECTION_TYPE selectionType;
 

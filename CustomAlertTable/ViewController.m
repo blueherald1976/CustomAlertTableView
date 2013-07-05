@@ -49,8 +49,7 @@
     NSArray *array_btn = @[@"ok", @"cancel", @"etc"];
     
     MPAlertTableView *alert = [[MPAlertTableView alloc] initWithCaller:self title:@"title(like alert)"
-                                                       tableDataSource:nil
-                                                tableSelectedRowIndexs:nil
+                                                       message:@"this is a message !!!\nbase source is below ~~~ https://github.com/marichka/Custom-Alert-View"
                                                           buttonTitles:array_btn];
     
     [alert showInView:self.view];
