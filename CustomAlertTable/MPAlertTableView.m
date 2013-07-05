@@ -313,16 +313,12 @@ tableSelectedRowIndexs:(NSArray*)_tableSelectedRowIndexs buttonTitles:(NSArray*)
         NSMutableArray *selArray = [NSMutableArray array];
         if(tableSelectedRowIndexs)
         {
-
-            int idx = 0x00;
-            
             NSArray *key_list = [tableSelectedRowIndexs allKeys];
             for(NSNumber *key in key_list)
             {
                 BOOL yesNo = [[tableSelectedRowIndexs objectForKey:key] boolValue];
                 if(yesNo)
-                    [selArray addObject:[NSNumber numberWithInt:idx]];
-                idx++;
+                    [selArray addObject:key];
             }
         }
         [caller didSelectedButtonIndex:button_index withSelectedTableRowIndexArray:selArray];
