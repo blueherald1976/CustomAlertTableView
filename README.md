@@ -1,9 +1,11 @@
-
+Custom-Alert-View-with Table
+=================
 custom alert view with table for iOS
 
 modified by blueherald@naver.com
 
 base source is below ~~~
+https://github.com/marichka/Custom-Alert-View
 
 ===================================================================================
 Custom-Alert-View
